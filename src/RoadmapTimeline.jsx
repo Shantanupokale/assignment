@@ -1,6 +1,8 @@
 
 import { useRef, useState, useEffect } from "react";
 import { ArrowUpRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
 
 const phases = [
 {
@@ -75,6 +77,7 @@ const phases = [
 },
 ];
 
+
 export default function RoadmapTimeline() {
 const containerRef = useRef(null);
 const [activePhase, setActivePhase] = useState(0);
@@ -124,12 +127,50 @@ useEffect(() => {
     return () => window.removeEventListener("scroll", onScroll);
 }, [activePhase]);
 
+// Animation variants
+const cardVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+        duration: 0.4,
+        ease: [0.16, 1, 0.3, 1],
+    },
+    },
+    exit: { opacity: 0, y: -10 },
+};
+
+const dotVariants = {
+    initial: { scale: 1 },
+    active: {
+    scale: [1, 1.2, 1],
+    transition: { duration: 0.4 },
+    },
+};
+
+const progressBarVariants = {
+    initial: { height: 0 },
+    animate: {
+    height: `${(activePhase / (phases.length - 1)) * 100}%`,
+    transition: {
+        duration: 0.8,
+        ease: [0.16, 1, 0.3, 1],
+    },
+    },
+};
+
 return (
     <div ref={containerRef} className="min-h-[300vh] bg-gray-50">
     <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden bg-[#1C1C1C]">
-        <div className="max-w-5xl mx-auto  w-full">
-        {/* Heading Section */}
-        <div className="mb-10 text-center font-jakarta">
+        <div className="max-w-5xl mx-auto w-full">
+        {/* Heading Section with animation */}
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-10 text-center font-jakarta"
+        >
             <h3 className="text-sm font-medium tracking-widest text-[#A58BFF] uppercase mb-3">
             Product Roadmap
             </h3>
@@ -137,100 +178,150 @@ return (
             Engineering Updates &<br />
             Development Phase
             </h2>
-        </div>
+        </motion.div>
 
-        <div className="flex items-center gap-8 ">
+        <div className="flex items-center gap-8">
             {/* Left Timeline */}
             <div className="flex flex-col items-center relative h-full">
             {/* Thicker vertical line background (full height) */}
             <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[4px] h-full bg-[#2C2C2C] z-0" />
 
-            {/* Filled portion till activePhase */}
-            <div
+            {/* Filled portion till activePhase with animation */}
+            <motion.div
                 className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[4px] bg-[#8b5cf6] z-10"
-                style={{
-                height: `${(activePhase / (phases.length - 1)) * 100}%`,
-                transition: "height  ease",
-                }}
+                variants={progressBarVariants}
+                initial="initial"
+                animate="animate"
             />
 
             <div className="flex flex-col space-y-[44px] relative z-20">
                 {phases.map((_, index) => (
-                <div key={index} className="flex items-center justify-center">
+                <motion.div
+                    key={index}
+                    className="flex items-center justify-center"
+                    variants={dotVariants}
+                    initial="initial"
+                    animate={index === activePhase ? "active" : "initial"}
+                >
                     {index < activePhase ? (
                     // Completed phase: small purple dot
-                    <div className="w-3 h-3 bg-[#8b5cf6] rounded-full shadow-sm" />
+                    <motion.div
+                        className="w-3 h-3 bg-[#8b5cf6] rounded-full shadow-sm"
+                        whileHover={{ scale: 1.2 }}
+                    />
                     ) : index === activePhase ? (
                     // Current phase: large purple circle with number
-                    <div className="w-8 h-8 bg-[#8b5cf6] rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
+                    <motion.div
+                        className="w-8 h-8 bg-[#8b5cf6] rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md"
+                        whileHover={{ scale: 1.05 }}
+                    >
                         {index + 1}
-                    </div>
+                    </motion.div>
                     ) : (
                     // Future phase: small gray dot
                     <div className="w-3 h-3 bg-[#2C2C2C] rounded-full" />
                     )}
-                </div>
+                </motion.div>
                 ))}
             </div>
             </div>
 
-            {/* Cards */}
+            {/* Cards with AnimatePresence for smooth transitions */}
             <div className="flex gap-4 flex-1">
-
-            {/* left card */}
-            <div className="bg-[#846CEC] max-w-[18vw] rounded-2xl p-3 flex-1 min-h-[320px] max-h-[320px] shadow-md flex flex-col overflow-hidden relative">
+            {/* Left card */}
+            <AnimatePresence mode="wait">
+                <motion.div
+                key={`left-${activePhase}`}
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="bg-[#846CEC] max-w-[18vw] rounded-2xl p-3 flex-1 min-h-[320px] max-h-[320px] shadow-md flex flex-col overflow-hidden relative"
+                >
                 {/* Text content */}
                 <div className="p-6 px-8 z-10">
-                <div className="text-white/70 text-sm font-medium mb-1 tracking-wide uppercase">
-                    {phases[activePhase]?.phase || "Phase " + (activePhase + 1)}
-                </div>
-                <h3 className="text-white text-xl font-semibold mb-3 leading-snug whitespace-pre-line">
+                    <motion.div
+                    className="text-white/70 text-sm font-medium mb-1 tracking-wide uppercase"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    >
+                    {phases[activePhase]?.phase ||
+                        "Phase " + (activePhase + 1)}
+                    </motion.div>
+                    <motion.h3
+                    className="text-white text-xl font-semibold mb-3 leading-snug whitespace-pre-line"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    >
                     {phases[activePhase]?.title ||
-                    `Phase ${activePhase + 1} Title`}
-                </h3>
+                        `Phase ${activePhase + 1} Title`}
+                    </motion.h3>
                 </div>
 
-                {/* Image from halfway down to bottom */}
-                <img
-                src={
+                {/* Image with animation */}
+                <motion.img
+                    src={
                     phases[activePhase]?.image ||
                     "/placeholder.svg?height=120&width=160"
-                }
-                alt={`${
+                    }
+                    alt={`${
                     phases[activePhase]?.title || `Phase ${activePhase + 1}`
-                } illustration`}
-                className="absolute top-1/2 left-0 w-full h-[60%] object-cover"
+                    } illustration`}
+                    className="absolute top-1/2 left-0 w-full h-[60%] object-cover"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
                 />
-            </div>
+                </motion.div>
+            </AnimatePresence>
 
-            {/* right card */}
-            <div className="bg-[#202020] rounded-2xl  flex-1 shadow-sm min-h-[180px] flex flex-col ">
-                <h4 className="text-white text-xl font-semibold  py-6 px-6 border-b border-[#333333]">
-                {phases[activePhase]?.header ||
+            {/* Right card */}
+            <AnimatePresence mode="wait">
+                <motion.div
+                key={`right-${activePhase}`}
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="bg-[#202020] rounded-2xl flex-1 shadow-sm min-h-[180px] flex flex-col"
+                >
+                <motion.h4
+                    className="text-white text-xl font-semibold py-6 px-6 border-b border-[#333333]"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    {phases[activePhase]?.header ||
                     `Phase ${activePhase + 1} Details`}
-                </h4>
+                </motion.h4>
 
-                <div className="flex flex-col h-full justify-between ">
-                {(
+                <div className="flex flex-col h-full justify-between">
+                    {(
                     phases[activePhase]?.descriptions || [
-                    `Description for phase ${activePhase + 1}`,
+                        `Description for phase ${activePhase + 1}`,
                     ]
-                ).map((desc, index, array) => (
-                    <div
-                    key={`${activePhase}-${index}`}
-                    className={`flex-1 py-2 ${
+                    ).map((desc, index, array) => (
+                    <motion.div
+                        key={`${activePhase}-${index}`}
+                        className={`flex-1 py-2 ${
                         index !== array.length - 1
-                        ? "border-b border-[#333333]"
-                        : ""
-                    }`}
+                            ? "border-b border-[#333333]"
+                            : ""
+                        }`}
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 + index * 0.1 }}
                     >
-                    <p className="text-[#868E8B] text-md leading-normal h-full flex items-center px-6">
+                        <p className="text-[#868E8B] text-md leading-normal h-full flex items-center px-6">
                         {desc}
-                    </p>
-                    </div>
-                ))}
+                        </p>
+                    </motion.div>
+                    ))}
                 </div>
-            </div>
+                </motion.div>
+            </AnimatePresence>
             </div>
         </div>
 
@@ -243,6 +334,12 @@ return (
         </div>
         </div>
     </div>
-</div>
+    </div>
 );
 }
+
+
+
+
+
+
