@@ -5,9 +5,9 @@ export default function Landing() {
     
 
      
-      <section className="relative">
+  
         <RoadmapTimeline />
-      </section>
+     
 
      
   )
