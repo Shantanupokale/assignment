@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Add this to your global.css or equivalent */
+body {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #585858;
+  border-radius: px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5e5c62;
+}
